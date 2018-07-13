@@ -1,75 +1,62 @@
 package net.thedudemc.freelook.util.handlers;
 
-import org.lwjgl.input.Mouse;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.Vec2f;
-import net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.thedudemc.freelook.proxy.ClientProxy;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 
 @EventBusSubscriber
 public class EventHandler {
 
-	public static boolean keyPressed = false;
+
+	// private static long lastAltClick = 0;
+	// private static boolean altIsPressed = false;
+
+	@SubscribeEvent
+	public static void onRenderTick(TickEvent.RenderTickEvent event) {
+
+		Camera.update(event.phase == Phase.START);
+
+	}
 
 	/*
-	 * @SubscribeEvent public void onRenderTick(TickEvent.RenderTickEvent event) {
-	 * if (event.phase == Phase.START || Minecraft.getMinecraft().isGamePaused()) {
-	 * return; } float partialTicks = event.renderTickTime; float yaw =
-	 * Mouse.getDX() + (Mouse.getDX() * partialTicks); float pitch = Mouse.getDY() +
-	 * (Mouse.getDY() * partialTicks); //if (yaw > 180.0f) { yaw -= 360.0f; } //else
-	 * if (yaw < -180.0f) { yaw += 360.0f; }
+	 * public static Camera camera = new Camera();
 	 * 
-	 * EntityPlayer p = Minecraft.getMinecraft().player;
-	 * //p.setLocationAndAngles(p.posX, p.posY, p.posZ, yaw, pitch); p.rotationYaw =
-	 * yaw; p.prevRotationYaw = yaw; p.rotationPitch = pitch; p.prevRotationPitch =
-	 * pitch; System.out.println("Shit is happening.."); }
+	 * @SubscribeEvent public void onCamera(EntityViewRenderEvent.CameraSetup
+	 * event){
+	 * 
+	 * Minecraft mc = Minecraft.getMinecraft(); Entity entity = event.getEntity();
+	 * if (entity instanceof EntityLivingBase &&
+	 * ((EntityLivingBase)entity).isPlayerSleeping() ||
+	 * mc.gameSettings.thirdPersonView != 1){ return; } float f =
+	 * entity.getEyeHeight(); double partialTicks = event.getRenderPartialTicks();
+	 * double d0 = entity.prevPosX + (entity.posX - entity.prevPosX) *
+	 * (double)partialTicks; double d1 = entity.prevPosY + (entity.posY -
+	 * entity.prevPosY) * (double)partialTicks + (double)f; double d2 =
+	 * entity.prevPosZ + (entity.posZ - entity.prevPosZ) * (double)partialTicks;
+	 * double d3 = camera.cameraDistance - 4;
+	 * 
+	 * float f1 = entity.rotationYaw; float f2 = entity.rotationPitch;
+	 * 
+	 * double d4 = (double)(-MathHelper.sin(f1 * 0.017453292F) * MathHelper.cos(f2 *
+	 * 0.017453292F)) * d3; double d5 = (double)(MathHelper.cos(f1 * 0.017453292F) *
+	 * MathHelper.cos(f2 * 0.017453292F)) * d3; double d6 =
+	 * (double)(-MathHelper.sin(f2 * 0.017453292F)) * d3;
+	 * 
+	 * for (int i = 0; i < 8; ++i) { float f3 = (float)((i & 1) * 2 - 1); float f4 =
+	 * (float)((i >> 1 & 1) * 2 - 1); float f5 = (float)((i >> 2 & 1) * 2 - 1); f3 =
+	 * f3 * 0.1F; f4 = f4 * 0.1F; f5 = f5 * 0.1F; RayTraceResult raytraceresult =
+	 * mc.world.rayTraceBlocks(new Vec3d(d0 + (double)f3, d1 + (double)f4, d2 +
+	 * (double)f5), new Vec3d(d0 - d4 + (double)f3 + (double)f5, d1 - d6 +
+	 * (double)f4, d2 - d5 + (double)f5));
+	 * 
+	 * if (raytraceresult != null) { double d7 =
+	 * raytraceresult.hitVec.distanceTo(new Vec3d(d0, d1, d2));
+	 * 
+	 * if (d7 < d3) { d3 = d7; } } } GlStateManager.rotate(entity.rotationPitch -
+	 * f2, 1.0F, 0.0F, 0.0F); GlStateManager.rotate(entity.rotationYaw - f1, 0.0F,
+	 * 1.0F, 0.0F); GlStateManager.translate(0.0F, 0.0F, (float)(-d3));
+	 * GlStateManager.rotate(f1 - entity.rotationYaw, 0.0F, 1.0F, 0.0F);
+	 * GlStateManager.rotate(f2 - entity.rotationPitch, 1.0F, 0.0F, 0.0F); }
 	 */
-
-	@SubscribeEvent
-	public static void onKeyInput(KeyInputEvent event) {
-
-		KeyBinding[] keyBindings = ClientProxy.keyBindings;
-
-		if (keyBindings[0].isPressed()) {
-			keyPressed = true;
-
-		} else {
-			keyPressed = false;
-		}
-	}
-
-	@SubscribeEvent
-	public static void controlCamera(CameraSetup e) {
-
-		if (keyPressed == true) {
-
-			if (e.getEntity() instanceof EntityPlayer) {
-				
-				float sens = Minecraft.getMinecraft().gameSettings.mouseSensitivity;
-				
-				float originalX = Mouse.getX(); 		System.out.println("Original X position is: " + originalX);				
-				float originalY = Mouse.getY(); 		System.out.println("Original Y position is: " + originalY);				
-				float newX = Mouse.getX(); 				System.out.println("New X position is: " + newX);				
-				float newY = Mouse.getY(); 				System.out.println("New Y position is: " + newY);				
-				float diffX = originalX - newX; 		System.out.println("Difference between original and new X: " + diffX);				
-				float diffY = originalY - newY; 		System.out.println("Difference between original and new Y: " + diffY);				
-				float sensX = diffX * sens; 			System.out.println("Difference of X as affected by sensitivity: " + sensX);				
-				float sensY = diffY * sens; 			System.out.println("Difference of Y as affected by sensitivity: " + sensY);				
-				float x = newX + sensX; 				System.out.println("New camera position to move cursor on X: " + x);				
-				float y = newY + sensY; 				System.out.println("New camera position to move cursor on Y: " + y);
-
-				Vec2f vec = e.getEntity().getPitchYaw();
-				System.out.println("Vec thing is: " + vec);
-				
-			}
-		}
-
-	}
-
 }
