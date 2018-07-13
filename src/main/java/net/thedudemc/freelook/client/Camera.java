@@ -1,4 +1,4 @@
-package net.thedudemc.freelook.util.handlers;
+package net.thedudemc.freelook.client;
 
 import org.lwjgl.input.Mouse;
 
@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import net.thedudemc.freelook.proxy.ClientProxy;
 
 public class Camera {
 	static KeyBinding altKey = ClientProxy.keyBinding;
@@ -18,30 +17,37 @@ public class Camera {
 	public static float playerPitch = 0;
 	public static float originYaw = 0;
 	public static float originPitch = 0;
-	
+
+	public float cameraDistance = 0;
+
 	public static void update(boolean start) {
 		Minecraft mc = Minecraft.getMinecraft();
 		Entity player = mc.getRenderViewEntity();
+		if (player == null && !enabled) {
+			return;
+		}
 
-		// Run updateCamera Method first..
-		updateCamera();
-		// at the start of the RenderTickEvent phase, do this
-		if (start) {
+		// if enabled, at the start of the RenderTickEvent phase, do this
+		if (enabled) {
+			// Run updateCamera Method first..
+			updateCamera();
+			if (start) {
 
-			// sets the player's rotation and previous rotation (aka camera) to cameraYaw,
-			// which was established in updateCamera
-			player.rotationYaw = player.prevRotationYaw = cameraYaw;
-			player.rotationPitch = player.prevRotationPitch = -cameraPitch;
+				// sets the player's rotation and previous rotation (aka camera) to cameraYaw,
+				// which was established in updateCamera
+				player.rotationYaw = player.prevRotationYaw = cameraYaw;
+				player.rotationPitch = player.prevRotationPitch = -cameraPitch;
 
-			// Then at the end of the RenderTickEvent phase...
-		} else {
-			// set player's rotation to the client's current rotation, subtracted by camera
-			// rotation - player rotation.
-			player.rotationYaw = mc.player.rotationYaw - cameraYaw + playerYaw;
-			player.prevRotationYaw = mc.player.prevRotationYaw - cameraYaw + playerYaw;
-			// these invert the pitch so up is up, etc.
-			player.rotationPitch = -playerPitch;
-			player.prevRotationPitch = -playerPitch;
+				// Then at the end of the RenderTickEvent phase...
+			} else {
+				// set player's rotation to the client's current rotation, subtracted by camera
+				// rotation - player rotation.
+				player.rotationYaw = mc.player.rotationYaw - cameraYaw + playerYaw;
+				player.prevRotationYaw = mc.player.prevRotationYaw - cameraYaw + playerYaw;
+				// these invert the pitch so up is up, etc.
+				player.rotationPitch = -playerPitch;
+				player.prevRotationPitch = -playerPitch;
+			}
 		}
 
 	}
@@ -52,7 +58,7 @@ public class Camera {
 
 		// if not in the game, utilizing the camera... (ie. not in pause menu or other
 		// gui.) do nothing.
-		if (!mc.inGameHasFocus) {
+		if (!mc.inGameHasFocus && !enabled) {
 			return;
 		}
 
@@ -70,6 +76,7 @@ public class Camera {
 		// Essentially, this method wont even be called if the player isn't holding the
 		// key so this is redundant.
 		if (ClientProxy.keyBinding.isKeyDown()) {
+
 			// cameraYaw + dx then set cameraYaw to that value.. ie. 0 + 1 = 1, cameraYaw =
 			// 1
 			cameraYaw += dx;
@@ -82,17 +89,18 @@ public class Camera {
 			// Don't think this ever gets called since this method cannot run if the key
 			// isn't held to begin with
 		} else {
+
 			playerYaw += dx;
 			playerPitch += dy;
 			playerPitch = MathHelper.clamp(playerPitch, -90.0F, 90.0F);
-			playerYaw = MathHelper.clamp(playerYaw, -100.0F, 100.0F);
+			enabled = false;
+			// playerYaw = MathHelper.clamp(playerYaw, -100.0F, 100.0F);
 		}
 
 	}
 
 	// ignore this for now..
 	public static void reset() {
-		enabled = false;
 		cameraYaw = 0;
 		cameraPitch = 0;
 		playerYaw = 0;
@@ -100,15 +108,16 @@ public class Camera {
 	}
 
 	// should probably implement this somewhere.. we shall see.
-	public void enabled() {
+	public static void setCamera() {
 		Minecraft mc = Minecraft.getMinecraft();
-		if (!enabled) {
-			// I *think* this establishes the starting position when you first press alt..
-			cameraYaw = playerYaw = mc.player.rotationYaw;
-			cameraPitch = mc.player.rotationPitch;
-			playerPitch = -cameraPitch;
-		}
+
+		// leaves the position set after letting go of the keybind
+		cameraYaw = playerYaw = mc.player.rotationYaw;
+		cameraPitch = -mc.player.rotationPitch;
+		playerPitch = cameraPitch;
+
 		enabled = true;
+
 	}
 
 }
