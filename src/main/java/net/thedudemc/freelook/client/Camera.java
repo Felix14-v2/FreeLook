@@ -6,9 +6,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 import net.thedudemc.freelook.FreeLook;
+import net.thedudemc.freelook.util.Config;
 
 public class Camera {
 	public static boolean enabled = false;
+
+	private static Minecraft mc = Minecraft.getMinecraft();
+	private static Entity player = mc.getRenderViewEntity();
 
 	public static float cameraYaw = 0;
 	public static float cameraPitch = 0;
@@ -19,14 +23,78 @@ public class Camera {
 
 	public static float cameraDistance = 0;
 
+	public static void setCamera() {
+
+		cameraYaw = playerYaw = originalYaw = mc.player.rotationYaw;
+		cameraPitch = originalPitch = -mc.player.rotationPitch;
+		playerPitch = cameraPitch;
+
+		enabled = true;
+	}
+
+	private static void updateCamera() {
+
+		if (!mc.inGameHasFocus && !enabled) {
+			return;
+		}
+
+		float f = mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
+		float f1 = f * f * f * 8.0F;
+
+		double dx = Mouse.getDX() * f1 * 0.15D;
+		double dy = Mouse.getDY() * f1 * 0.15D;
+
+		if (FreeLook.keyFreeLook.isKeyDown()) {
+
+			cameraYaw += dx;
+			cameraPitch += dy;
+			cameraPitch = MathHelper.clamp(cameraPitch, -90.0F, 90.0F);
+			if (Config.viewClamping == true) {
+				cameraYaw = MathHelper.clamp(cameraYaw, (originalYaw + -100.0F), (originalYaw + 100.0F));
+			}
+		}
+	}
+
+	public static void resetCamera() {
+		cameraYaw = originalYaw;
+		cameraPitch = originalPitch;
+		playerYaw = originalYaw;
+		playerPitch = originalPitch;
+		enabled = false;
+	}
+
 	public static void update(boolean start) {
-		Minecraft mc = Minecraft.getMinecraft();
-		Entity player = mc.getRenderViewEntity();
 		if (player == null) {
 			return;
 		}
-		if(enabled) {
+		if (enabled) {
 			updateCamera();
+			if (start) {
+
+				player.rotationYaw = player.prevRotationYaw = cameraYaw;
+				player.rotationPitch = player.prevRotationPitch = -cameraPitch;
+
+			} else {
+				player.rotationYaw = mc.player.rotationYaw - cameraYaw + playerYaw;
+				player.prevRotationYaw = mc.player.prevRotationYaw - cameraYaw + playerYaw;
+
+				player.rotationPitch = -playerPitch;
+				player.prevRotationPitch = -playerPitch;
+			}
+		}
+	}
+
+	public static void cameraEnabled(boolean start) {
+		if (player == null && !mc.inGameHasFocus) {
+			return;
+		}
+		if (mc.inGameHasFocus) {
+			if (!enabled) {
+				setCamera();
+				enabled = true;
+			}
+
+			updateCamera2();
 			if (start) {
 
 				player.rotationYaw = player.prevRotationYaw = cameraYaw;
@@ -43,49 +111,27 @@ public class Camera {
 
 	}
 
-	private static void updateCamera() {
-		Minecraft mc = Minecraft.getMinecraft();
+	private static void updateCamera2() {
 
 		if (!mc.inGameHasFocus && !enabled) {
 			return;
 		}
 
-		float f = mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
-		float f1 = f * f * f * 8.0F;
+		if (mc.inGameHasFocus) {
 
-		double dx = Mouse.getDX() * f1 * 0.15D;
-		double dy = Mouse.getDY() * f1 * 0.15D;
+			float f = mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
+			float f1 = f * f * f * 8.0F;
 
-		if (FreeLook.keyBinding.isKeyDown()) {
+			double dx = Mouse.getDX() * f1 * 0.15D;
+			double dy = Mouse.getDY() * f1 * 0.15D;
 
 			cameraYaw += dx;
 			cameraPitch += dy;
 
 			cameraPitch = MathHelper.clamp(cameraPitch, -90.0F, 90.0F);
-			cameraYaw = MathHelper.clamp(cameraYaw, (originalYaw + -100.0F), (originalYaw + 100.0F));
-
-		} else {
-
+			if (Config.viewClamping == true) {
+				cameraYaw = MathHelper.clamp(cameraYaw, (originalYaw + -100.0F), (originalYaw + 100.0F));
+			}
 		}
-
 	}
-
-	public static void reset() {
-		cameraYaw = originalYaw;
-		cameraPitch = originalPitch;
-		playerYaw = originalYaw;
-		playerPitch = originalPitch;
-	}
-
-	public static void setCamera() {
-		Minecraft mc = Minecraft.getMinecraft();
-
-		cameraYaw = playerYaw = originalYaw = mc.player.rotationYaw;
-		cameraPitch = originalPitch = -mc.player.rotationPitch;
-		playerPitch = cameraPitch;
-
-		enabled = true;
-
-	}
-
 }

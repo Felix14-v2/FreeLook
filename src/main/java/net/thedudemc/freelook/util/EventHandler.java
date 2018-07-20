@@ -1,8 +1,10 @@
 package net.thedudemc.freelook.util;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.thedudemc.freelook.FreeLook;
@@ -11,31 +13,54 @@ import net.thedudemc.freelook.client.Camera;
 @EventBusSubscriber
 public class EventHandler {
 
-	public static boolean altIsDown = false;
-	public static boolean last = false;
+	public static boolean toggleEnabled = false;
+	public static boolean initialPress = false;
+	public static boolean freelookEnabled = false;
+	public static boolean disabled = true;
 
 	@SubscribeEvent
 	public static void onRenderTick(TickEvent.RenderTickEvent event) {
-		if (FreeLook.keyBinding.isKeyDown() && last) {
-			Camera.update(event.phase == Phase.START);
-		}
-		if (!FreeLook.keyBinding.isKeyDown() && last) {
-			Camera.reset(); 
-			last = false;
+		if (!toggleEnabled) {
+			if (FreeLook.keyFreeLook.isKeyDown() && !initialPress) {
+				Camera.setCamera();
+				initialPress = true;
+			}
+			if (FreeLook.keyFreeLook.isKeyDown() && initialPress) {
+				Camera.update(event.phase == Phase.START);
+			}
+			if (!FreeLook.keyFreeLook.isKeyDown() && initialPress) {
+				Camera.resetCamera();
+				initialPress = false;
+			}
+		} else {
+			if (freelookEnabled) {
+				Camera.cameraEnabled(event.phase == Phase.START);
+			} else {
+				Camera.resetCamera();
+			}
 		}
 	}
+
 
 	@SubscribeEvent
-	public static void onKey(KeyInputEvent event) {
-		if (FreeLook.keyBinding.isPressed()) {
-			if (!altIsDown) {
-				Camera.setCamera();
+	public static void onClientTick(TickEvent.ClientTickEvent event) {
+		if (FreeLook.keyToggleMode.isPressed()) {
+			if (!toggleEnabled) {
+				toggleEnabled = true;
+				Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.GREEN + "FreeLook Mode: Toggle"));
+
+			} else {
+				toggleEnabled = false;
+				Minecraft.getMinecraft().player.sendMessage(new TextComponentString(TextFormatting.GREEN + "FreeLook Mode: Hold"));
+
 			}
-			altIsDown = true;
-			last = true;
-		} else {
-			altIsDown = false;
+		}
+		if (FreeLook.keyFreeLook.isPressed() && toggleEnabled) {
+			if (!freelookEnabled) {
+				freelookEnabled = true;
+			} else {
+				freelookEnabled = false;
+			}
 		}
 	}
-
 }
