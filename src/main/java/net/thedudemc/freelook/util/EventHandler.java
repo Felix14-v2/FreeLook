@@ -1,6 +1,7 @@
 package net.thedudemc.freelook.util;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -20,30 +21,36 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public static void onRenderTick(TickEvent.RenderTickEvent event) {
-		if (!toggleEnabled) {
-			if (FreeLook.keyFreeLook.isKeyDown() && !initialPress) {
-				Camera.setCamera();
-				initialPress = true;
-			}
-			if (FreeLook.keyFreeLook.isKeyDown() && initialPress) {
-				Camera.update(event.phase == Phase.START);
-			}
-			if (!FreeLook.keyFreeLook.isKeyDown() && initialPress) {
-				Camera.resetCamera();
-				initialPress = false;
-			}
-		} else {
-			if (freelookEnabled) {
-				Camera.cameraEnabled(event.phase == Phase.START);
+		EntityPlayer player = Minecraft.getMinecraft().player;
+		if (player == null) {
+			return;
+		}
+		if (!player.isRiding()) {
+			if (!toggleEnabled) {
+				if (FreeLook.keyFreeLook.isKeyDown() && !initialPress) {
+					Camera.setCamera();
+					initialPress = true;
+				}
+				if (FreeLook.keyFreeLook.isKeyDown() && initialPress) {
+					Camera.update(event.phase == Phase.START);
+				}
+				if (!FreeLook.keyFreeLook.isKeyDown() && initialPress) {
+					Camera.resetCamera();
+					initialPress = false;
+				}
 			} else {
-				Camera.resetCamera();
+				if (freelookEnabled) {
+					Camera.cameraEnabled(event.phase == Phase.START);
+				} else {
+					Camera.resetCamera();
+				}
 			}
 		}
 	}
 
-
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event) {
+		EntityPlayer player = Minecraft.getMinecraft().player;
 		if (FreeLook.keyToggleMode.isPressed()) {
 			if (!toggleEnabled) {
 				toggleEnabled = true;
@@ -55,12 +62,19 @@ public class EventHandler {
 
 			}
 		}
-		if (FreeLook.keyFreeLook.isPressed() && toggleEnabled) {
-			if (!freelookEnabled) {
-				freelookEnabled = true;
-			} else {
-				freelookEnabled = false;
+		if (player == null) {
+			return;
+		}
+		if (!player.isRiding()) {
+
+			if (FreeLook.keyFreeLook.isPressed() && toggleEnabled) {
+				if (!freelookEnabled) {
+					freelookEnabled = true;
+				} else {
+					freelookEnabled = false;
+				}
 			}
 		}
 	}
+
 }

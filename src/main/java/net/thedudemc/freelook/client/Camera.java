@@ -11,8 +11,8 @@ import net.thedudemc.freelook.util.Config;
 public class Camera {
 	public static boolean enabled = false;
 
-	private static Minecraft mc = Minecraft.getMinecraft();
-	private static Entity player = mc.getRenderViewEntity();
+	public static Minecraft mc = Minecraft.getMinecraft();
+	public static Entity player = mc.getRenderViewEntity();
 
 	public static float cameraYaw = 0;
 	public static float cameraPitch = 0;
