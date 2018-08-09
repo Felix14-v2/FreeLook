@@ -11,8 +11,6 @@ import net.thedudemc.freelook.util.Config;
 public class Camera {
 	public static boolean enabled = false;
 
-	public static Minecraft mc = Minecraft.getMinecraft();
-	public static Entity player = mc.getRenderViewEntity();
 
 	public static float cameraYaw = 0;
 	public static float cameraPitch = 0;
@@ -25,6 +23,7 @@ public class Camera {
 
 	public static void setCamera() {
 
+		Minecraft mc = Minecraft.getMinecraft();
 		cameraYaw = playerYaw = originalYaw = mc.player.rotationYaw;
 		cameraPitch = originalPitch = -mc.player.rotationPitch;
 		playerPitch = cameraPitch;
@@ -34,6 +33,7 @@ public class Camera {
 
 	private static void updateCamera() {
 
+		Minecraft mc = Minecraft.getMinecraft();
 		if (!mc.inGameHasFocus && !enabled) {
 			return;
 		}
@@ -64,6 +64,8 @@ public class Camera {
 	}
 
 	public static void update(boolean start) {
+		Minecraft mc = Minecraft.getMinecraft();
+		Entity player = mc.getRenderViewEntity();
 		if (player == null) {
 			return;
 		}
@@ -85,6 +87,8 @@ public class Camera {
 	}
 
 	public static void cameraEnabled(boolean start) {
+		Minecraft mc = Minecraft.getMinecraft();
+		Entity player = mc.getRenderViewEntity();
 		if (player == null && !mc.inGameHasFocus) {
 			return;
 		}
@@ -112,6 +116,7 @@ public class Camera {
 	}
 
 	private static void updateCamera2() {
+		Minecraft mc = Minecraft.getMinecraft();
 
 		if (!mc.inGameHasFocus && !enabled) {
 			return;

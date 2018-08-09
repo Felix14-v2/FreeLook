@@ -6,6 +6,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.thedudemc.freelook.FreeLook;
@@ -18,6 +19,16 @@ public class EventHandler {
 	public static boolean initialPress = false;
 	public static boolean freelookEnabled = false;
 	public static boolean disabled = true;
+	
+	@SubscribeEvent
+	public static void onRespawn(PlayerRespawnEvent e) {
+		initialPress = false;
+		toggleEnabled = false;
+		freelookEnabled = false;
+		disabled = true;
+		Camera.setCamera();
+	}
+
 
 	@SubscribeEvent
 	public static void onRenderTick(TickEvent.RenderTickEvent event) {
