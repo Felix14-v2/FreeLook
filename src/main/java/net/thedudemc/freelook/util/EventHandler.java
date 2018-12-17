@@ -19,7 +19,7 @@ public class EventHandler {
 	public static boolean initialPress = false;
 	public static boolean freelookEnabled = false;
 	public static boolean disabled = true;
-	
+
 	@SubscribeEvent
 	public static void onRespawn(PlayerRespawnEvent e) {
 		initialPress = false;
@@ -28,7 +28,6 @@ public class EventHandler {
 		disabled = true;
 		Camera.setCamera();
 	}
-
 
 	@SubscribeEvent
 	public static void onRenderTick(TickEvent.RenderTickEvent event) {
