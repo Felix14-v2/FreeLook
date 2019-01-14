@@ -16,8 +16,8 @@ import net.thedudemc.freelook.util.Reference;
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, clientSideOnly = true)
 public class FreeLook {
 
-	public static KeyBinding keyFreeLook;
-	public static KeyBinding keyToggleMode;
+	public static KeyBinding keyFreeLook = new KeyBinding("key.freelook.desc", Keyboard.KEY_LMENU, "key.freelook.category");
+	public static KeyBinding keyToggleMode = new KeyBinding("key.togglemode.desc", Keyboard.KEY_RMENU, "key.freelook.category");
 
 	@Instance
 	public static FreeLook instance;
@@ -29,8 +29,6 @@ public class FreeLook {
 
 	@EventHandler
 	public static void init(FMLInitializationEvent event) {
-		keyFreeLook = new KeyBinding("key.freelook.desc", Keyboard.KEY_LMENU, "key.freelook.category");
-		keyToggleMode = new KeyBinding("key.togglemode.desc", Keyboard.KEY_RMENU, "key.freelook.category");
 		ClientRegistry.registerKeyBinding(keyFreeLook);
 		ClientRegistry.registerKeyBinding(keyToggleMode);
 	}

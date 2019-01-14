@@ -11,7 +11,6 @@ import net.thedudemc.freelook.util.Config;
 public class Camera {
 	public static boolean enabled = false;
 
-
 	public static float cameraYaw = 0;
 	public static float cameraPitch = 0;
 	public static float playerYaw = 0;
